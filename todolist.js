@@ -1,14 +1,16 @@
 let tasksList = [];
 
-if (localStorage.getItem('tasks')) {
-  tasksList = JSON.parse(localStorage.getItem('tasks'));
-
-  displayTasks(tasksList);
-  setListners();
-} else {
-  setStorage(tasksList);
-  displayTasks(tasksList);
-  setListners();
+function init() {
+  if (localStorage.getItem('tasks')) {
+    tasksList = JSON.parse(localStorage.getItem('tasks'));
+  
+    displayTasks(tasksList);
+    setEventListners();
+  } else {
+    setStorage(tasksList);
+    displayTasks(tasksList);
+    setEventListners();
+  }
 }
 
 class Task {
@@ -50,7 +52,7 @@ export const displayTasks = (taskList) => {
   });
 };
 
-export function setListners() {
+export function setEventListners() {
   dragDropListeners();
   editTaskListners();
   taskCompleteListners();
@@ -72,23 +74,23 @@ export function addNewTask() {
   input.value = '';
   taskUl.innerHTML = '';
   displayTasks(taskArr);
-  setListners();
+  setEventListners();
 }
 
 export function deleteTask(event) {
   const taskUl = document.querySelector('.list-placeholder');
-  const remDiv = event.target.parentNode.parentNode;
+  const removeTaskDiv = event.target.parentNode.parentNode;
 
-  taskUl.removeChild(remDiv);
+  taskUl.removeChild(removeTaskDiv);
 }
 
 export function clearSelected() {
   const taskUl = document.querySelector('.list-placeholder');
-  const remTasks = document.querySelectorAll('.marked');
+  const removeTask = document.querySelectorAll('.marked');
 
-  remTasks.forEach((element) => {
-    const remDiv = element.parentElement.parentElement.parentElement;
-    taskUl.removeChild(remDiv);
+  removeTask.forEach((element) => {
+    const removeTaskDiv = element.parentElement.parentElement.parentElement;
+    taskUl.removeChild(removeTaskDiv);
   });
 }
 
@@ -97,13 +99,14 @@ function update() {
   const checkBoxItems = document.querySelectorAll('.checkbox');
   const descriptionItems = document.querySelectorAll('.task-description');
   const newObj = [];
-  for (let i = 0; i < checkBoxItems.length; i += 1) {
+
+  checkBoxItems.forEach((checkBox, index) => {
     newObj.push({
-      description: descriptionItems[i].value,
-      completed: checkBoxItems[i].checked,
+      description: descriptionItems[index].value,
+      completed: checkBox.checked,
       index: i + 1,
     });
-  }
+  });
   setStorage(newObj);
 }
 
@@ -126,11 +129,11 @@ export const dragDropListeners = () => {
   });
 
   arrContainer.forEach((container) => {
-    container.addEventListener('dragover', (e) => {
-      e.preventDefault();
+    container.addEventListener('dragover', (event) => {
+      event.preventDefault();
     });
-    container.addEventListener('dragenter', (e) => {
-      e.preventDefault();
+    container.addEventListener('dragenter', (event) => {
+      event.preventDefault();
     });
     container.addEventListener('drop', () => {
       dropSort(dragItem, container.firstElementChild);
@@ -144,8 +147,8 @@ export const taskCompleteListners = () => {
   const checkboxArr = Array.from(checkboxes);
 
   checkboxArr.forEach((inputBox) => {
-    inputBox.addEventListener('change', (e) => {
-      checkCompleted(e);
+    inputBox.addEventListener('change', (event) => {
+      checkCompleted(event);
       update();
     });
   });
@@ -154,8 +157,8 @@ export const taskCompleteListners = () => {
 export const addNewListner = () => {
   const input = document.querySelector('#input-task');
 
-  input.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter' && input.value !== '' && e.target.matches('#input-task')) {
+  input.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter' && input.value !== '' && event.target.matches('#input-task')) {
       addNewTask();
       update();
     }
@@ -178,8 +181,8 @@ export const deleteTaskListner = () => {
   const tasksArr = Array.from(tasks);
 
   tasksArr.forEach((task) => {
-    task.addEventListener('click', (e) => {
-      deleteTask(e);
+    task.addEventListener('click', (event) => {
+      deleteTask(event);
       update();
     });
   });
@@ -203,12 +206,12 @@ export default function dropSort(dragItem, currentItem) {
   oldContainer.appendChild(newItem);
 }
 
-export default function checkCompleted(e) {
-  e.target.completed = e.target.checked;
-  if (e.target.completed === true) {
-    e.currentTarget.nextElementSibling.classList.add('marked');
+export default function checkCompleted(event) {
+  event.target.completed = event.target.checked;
+  if (event.target.completed === true) {
+    event.currentTarget.nextElementSibling.classList.add('marked');
   } else {
-    e.currentTarget.nextElementSibling.classList.remove('marked');
+    event.currentTarget.nextElementSibling.classList.remove('marked');
   }
 }
 
@@ -217,4 +220,4 @@ function setStorage(taskList) {
 }
 
 export { setStorage as default };
-
+init();
